@@ -26,8 +26,10 @@ public class StepDefinition {
         spec.body(TestOrderFactory.createOrder());
     }
     @When("user calls {string} with Post http request")
-    public void user_calls_with_post_http_request(String postUri) {
-        response = spec.post(postUri).then();
+    public void user_calls_with_post_http_request(String uriEnumName)
+    {
+        String uri = APIResources.valueOf(uriEnumName).getUri();
+        response = spec.post(uri).then();
     }
     @Then("the API call got success with status code {int}")
     public void the_api_call_got_success_with_status_code(Integer expectedStatusCode) {
@@ -42,7 +44,8 @@ public class StepDefinition {
         response.body(key, is(notNullValue()));
     }
     @Then("{string} in response body is valid for {string} call")
-    public void in_response_body_is_valid_for_call(String key, String uri) {
+    public void in_response_body_is_valid_for_call(String key, String uriEnumName) {
+        String uri = APIResources.valueOf(uriEnumName).getUri();
         String id = response.extract().jsonPath().getString(key);
         RequestSpec.getSpec(REQUEST_LOG_FILE, RESPONSE_LOG_FILE).pathParam("key", id).get(uri).then().body( key, is(notNullValue()));
     }
