@@ -10,3 +10,4 @@ Scenario Outline: # Verify adding product passing order data
 Examples:
   |first name|last name|quantity|price|
   |Jean      |Carmen   |33      |32.33|
+  |Dave      |Johnson  |1       |47.33|
