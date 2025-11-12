@@ -1,4 +1,5 @@
 Feature: Validating Place API's
+@ProductOrderStaticOrders
 Scenario: Verify if Place is being successfully added using AddPlaceAPI
   Given Add Place Payload
   When user calls "PostProduct" with "Post" http request
