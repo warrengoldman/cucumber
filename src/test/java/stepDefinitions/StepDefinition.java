@@ -54,12 +54,10 @@ public class StepDefinition {
     }
     @Then("{string} in response body is {string}")
     public void in_response_body_is(String key, String expectedValue) {
-        // instead of overloaded below for float (and others needed)
-        // we could turn value in response to string and compare
-        // i.e.
+        // in case the key in the body is not a string (maybe it is a float)
+        // get it as a string so we can compare to expectedValue (which is a string)
         String actualValue = response.extract().jsonPath().getString(key);
         assertEquals(actualValue, expectedValue);
-        //response.body(key, equalTo(expectedValue));
     }
     // below method is required if users code gherkin without quote on data from examples
     // And "body.price" in response body is <price>
