@@ -25,6 +25,10 @@ public class StepDefinition {
     public void add_place_payload() {
         spec.body(TestOrderFactory.createOrder());
     }
+    @Given("Add Place Payload Given Data with {string} {string} {int} {double}")
+    public void add_place_payload_given_data_with(String firstName, String lastName, int quantity, double price) {
+        spec.body(TestOrderFactory.createOrder(firstName, lastName, quantity, price));
+    }
     @When("user calls {string} with Post http request")
     public void user_calls_with_post_http_request(String uriEnumName)
     {

@@ -15,12 +15,20 @@ public record TestOrderFactory() {
         );
     }
 
+    public static Order createOrder(String firstName, String lastName, int quantity, double price) {
+        return getOrder(firstName, lastName, quantity, price);
+    }
+
     public static Order createOrder() {
         Faker faker = new Faker();
         RandomService random = faker.random();
         int qty = random.nextInt(1, 11);
         double price = random.nextDouble(1.00, 55.00);
-        String custId = "%s %s-%d".formatted(faker.name().firstName(), faker.name().lastName(), qty);
-        return new Order(-1, qty, price, custId);
+        return getOrder(faker.name().firstName(), faker.name().lastName(), qty, price);
+    }
+
+    private static Order getOrder(String firstName, String lastName, int quantity, double price) {
+        String custId = "%s %s-%d".formatted(firstName, lastName, quantity);
+        return new Order(-1, quantity, price, custId);
     }
 }
