@@ -6,6 +6,9 @@ Scenario Outline: # Verify adding product passing order data
   When user calls "PostProduct" with "Post" http request
   Then the API call got success with status code 200
   And "key" in response body is present
+  And "body.price" in response body is <price>
+#  compare as string too
+  And "body.price" in response body is "<price>"
   When user calls "GetProductByKey" with "Get" http request with "key" in path
 Examples:
   |first name|last name|quantity|price|

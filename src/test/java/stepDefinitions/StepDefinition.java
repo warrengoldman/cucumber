@@ -14,6 +14,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertEquals;
 
 public class StepDefinition {
     private static final String LOG_FILE = "log.txt";
@@ -53,6 +54,17 @@ public class StepDefinition {
     }
     @Then("{string} in response body is {string}")
     public void in_response_body_is(String key, String expectedValue) {
+        // instead of overloaded below for float (and others needed)
+        // we could turn value in response to string and compare
+        // i.e.
+        String actualValue = response.extract().jsonPath().getString(key);
+        assertEquals(actualValue, expectedValue);
+        //response.body(key, equalTo(expectedValue));
+    }
+    // below method is required if users code gherkin without quote on data from examples
+    // And "body.price" in response body is <price>
+    @Then("{string} in response body is {float}")
+    public void in_response_body_is(String key, Float expectedValue) {
         response.body(key, equalTo(expectedValue));
     }
     @Then("{string} in response body is present")
