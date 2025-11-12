@@ -29,11 +29,23 @@ public class StepDefinition {
     public void add_place_payload_given_data_with(String firstName, String lastName, int quantity, double price) {
         spec.body(TestOrderFactory.createOrder(firstName, lastName, quantity, price));
     }
-    @When("user calls {string} with Post http request")
-    public void user_calls_with_post_http_request(String uriEnumName)
-    {
+    @When("user calls {string} with {string} http request")
+    public void user_calls_with_http_request(String uriEnumName, String httpMethod) {
+        user_calls_with_http_request_with_in_path(uriEnumName, httpMethod, null);
+    }
+    @When("user calls {string} with {string} http request with {string} in path")
+    public void user_calls_with_http_request_with_in_path(String uriEnumName, String httpMethod, String pathVarName) {
         String uri = APIResources.valueOf(uriEnumName).getUri();
-        response = spec.post(uri).then();
+        if (pathVarName != null && !pathVarName.isEmpty()) {
+            String valInPrevResponseForPathKey = response.extract().jsonPath().getString(pathVarName);
+            spec.pathParam(pathVarName, valInPrevResponseForPathKey);
+        }
+        if (httpMethod.equalsIgnoreCase("Get")) {
+            response = spec.get(uri).then();
+        } else {
+            //TODO all other httpMethods (like DELETE, PUT, PATCH) need adding
+            response = spec.post(uri).then();
+        }
     }
     @Then("the API call got success with status code {int}")
     public void the_api_call_got_success_with_status_code(Integer expectedStatusCode) {
@@ -46,12 +58,6 @@ public class StepDefinition {
     @Then("{string} in response body is present")
     public void in_response_body_is_present(String key) {
         response.body(key, is(notNullValue()));
-    }
-    @Then("{string} in response body is valid for {string} call")
-    public void in_response_body_is_valid_for_call(String key, String uriEnumName) {
-        String uri = APIResources.valueOf(uriEnumName).getUri();
-        String id = response.extract().jsonPath().getString(key);
-        RequestSpec.getSpec(REQUEST_LOG_FILE, RESPONSE_LOG_FILE).pathParam("key", id).get(uri).then().body( key, is(notNullValue()));
     }
     @BeforeAll
     public static void cleanUpBeforeAllTests() {
