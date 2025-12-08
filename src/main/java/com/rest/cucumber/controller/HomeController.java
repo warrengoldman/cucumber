@@ -5,6 +5,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.rest.cucumber.service.OrderService;
+import com.rest.cucumber.service.InventoryService;
+import com.rest.cucumber.service.SalesService;
+import com.rest.cucumber.model.Order;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +20,28 @@ import java.util.HashMap;
 @RestController
 @RequestMapping("/home")
 public class HomeController {
+
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private InventoryService inventoryService;
+
+    @Autowired
+    private SalesService salesService;
+
+    @GetMapping("/process-order")
+    public ResponseEntity<Object> processOrder() {
+        Order order = orderService.getOrderObject();
+        if (order == null || inventoryService.getQty(order.key()) <= 0) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else if (order.price() > 4) {
+            double totalCost = order.price() * order.qty();
+            inventoryService.reduceInventory(order.qty());
+            salesService.addRevenue(totalCost);
+        }
+        return ResponseEntity.ok(order);
+    }
     private HashMap<Integer, JsonNode> database = new HashMap<>();
     private JsonNode get(String key, String json) {
         if (key == null || key.isEmpty()) {
