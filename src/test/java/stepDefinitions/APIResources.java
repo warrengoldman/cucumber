@@ -2,7 +2,8 @@ package stepDefinitions;
 
 public enum APIResources {
     GetProductByKey("/get/product/{key}"),
-    PostProduct("/post/product");
+    PostProduct("/post/product"),
+    ProcessOrder("/process-order");
     private String uri;
     APIResources(String value) {
         uri = value;

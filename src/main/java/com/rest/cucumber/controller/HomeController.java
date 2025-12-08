@@ -31,8 +31,17 @@ public class HomeController {
     private SalesService salesService;
 
     @GetMapping("/process-order")
-    public ResponseEntity<Object> processOrder() {
+    public ResponseEntity<Object> processOrder(@RequestBody(required=false) String json) throws Exception {
         Order order = orderService.getOrderObject();
+        if (json != null && !json.isEmpty()) {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(json);
+            int orderQty = Integer.parseInt(jsonNode.get("qty").toString());
+            double orderPrice = Double.parseDouble(jsonNode.get("price").toString());
+            String custId = jsonNode.get("custId").toString();
+            int key = 9999;
+            order = new Order(key, orderQty, orderPrice, custId);
+        }
         if (order == null || inventoryService.getQty(order.key()) <= 0) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else if (order.price() > 4) {

@@ -9,7 +9,7 @@ import org.junit.runner.RunWith;
         features = "src/test/java/features", // Path to your feature files
         glue = {"stepDefinitions"}, // Package(s) containing your step definition
 //        to run a specific test
-//        tags = "@ProductOrderStaticOrders",
+//        tags = "@ProcessOrder",
         plugin = {"pretty", "html:target/cucumber/cucumber.html"}
 )
 public class TestRunner {
