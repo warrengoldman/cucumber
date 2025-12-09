@@ -1,7 +1,10 @@
 package stepDefinitions;
 
 import com.rest.cucumber.model.TestOrderFactory;
+
+import io.cucumber.java.Before;
 import io.cucumber.java.BeforeAll;
+import io.cucumber.java.Scenario;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -26,16 +29,41 @@ public class StepDefinition {
     private ValidatableResponse response;
     private Map<String, Object> scenarioContext = new HashMap<>(); // To store variables
 
+    @BeforeAll
+    public static void cleanUpBeforeAllTests() {
+        try {
+            Files.delete(Paths.get(REQUEST_LOG_FILE));
+        } catch (NoSuchFileException ignore) {
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        try {
+            Files.delete(Paths.get(RESPONSE_LOG_FILE));
+        } catch (NoSuchFileException ignore) {
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Before
+    public void setup(Scenario scenario) {
+        scenarioContext.put("scenario", scenario);
+    }
+
     @Given("Add Place Payload")
     public void add_place_payload() {
         spec.body(TestOrderFactory.createOrder());
     }
     @Given("user places order with {string} {string} {int} {double}")
     public void user_places_order(String firstName, String lastName, int quantity, double price) {
+        String msg = "User places order with %s %s %d %.2f".formatted(firstName, lastName, quantity, price);
+        scenarioContext.put("userPlacesOrderMsg", msg);
         add_place_payload_given_data_with(firstName, lastName, quantity, price);
     }
     @Given("Add Place Payload Given Data with {string} {string} {int} {double}")
     public void add_place_payload_given_data_with(String firstName, String lastName, int quantity, double price) {
+        String msg = "Add Place Payload Given Data with %s %s %d %.2f".formatted(firstName, lastName, quantity, price);
+        scenarioContext.put("addPlaceMsg", msg);
         spec.body(TestOrderFactory.createOrder(firstName, lastName, quantity, price));
     }
     @When("user calls {string} with {string} http request")
@@ -73,32 +101,26 @@ public class StepDefinition {
     }
     @Then("{string} in response body is {float}")
     public void in_response_body_is(String key, Float expectedValue) {
+        Scenario scenario = (Scenario)scenarioContext.get("scenario");
+        System.out.printf("scenario: %s%n userPlacesOrderMsg: %s%n addPlaceMsg: %s%n", getString(scenario), scenarioContext.get("userPlacesOrderMsg"), scenarioContext.get("addPlaceMsg"));
         response.body(key, equalTo(expectedValue));
+    }
+    private String getString(Scenario scenario) {
+        return "Current Scenario Name: %s, Scenario ID: %s, Scenario URI: %s, Scenario Tags: %s, Scenario Line: %s, Scenario Status: %s, Scenario Failed: %b"
+                .formatted(scenario.getName(), scenario.getId()
+                        , scenario.getUri(), scenario.getSourceTagNames()
+                        , scenario.getLine(), scenario.getStatus(), scenario.isFailed());
     }
     @Then("{string} integer in response body is {int}")
     public void in_response_body_is(String key, Integer expectedValue) {
+        Scenario scenario = (Scenario)scenarioContext.get("scenario");
+        System.out.printf("scenario: %s%n userPlacesOrderMsg: %s%n addPlaceMsg: %s%n", getString(scenario), scenarioContext.get("userPlacesOrderMsg"), scenarioContext.get("addPlaceMsg"));
         response.body(key, equalTo(expectedValue));
     }
     @Then("{string} in response body is present")
     public void in_response_body_is_present(String key) {
         response.body(key, is(notNullValue()));
     }
-    @BeforeAll
-    public static void cleanUpBeforeAllTests() {
-        try {
-            Files.delete(Paths.get(REQUEST_LOG_FILE));
-        } catch (NoSuchFileException ignore) {
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        try {
-            Files.delete(Paths.get(RESPONSE_LOG_FILE));
-        } catch (NoSuchFileException ignore) {
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-    }
-
     @When("user wants to process order")
     public void user_wants_to_process_order() {
         scenarioContext.put("currentInventory", 42);
