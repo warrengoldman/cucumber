@@ -1,9 +1,12 @@
 package stepDefinitions;
 
+import com.rest.cucumber.model.Order;
 import com.rest.cucumber.model.TestOrderFactory;
 
 import io.cucumber.java.Before;
 import io.cucumber.java.BeforeAll;
+import io.cucumber.java.DataTableType;
+import io.cucumber.java.PendingException;
 import io.cucumber.java.Scenario;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -16,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
@@ -125,5 +129,26 @@ public class StepDefinition {
     public void user_wants_to_process_order() {
         scenarioContext.put("currentInventory", 42);
         user_calls_with_http_request_with_in_path("ProcessOrder", "get", null);
+    }
+
+    @Given("log\\({string})")
+    public void log(String arg0) {
+        // method to allow logging to cucumber test results
+        Scenario scenario = (Scenario) scenarioContext.get("scenario");
+        scenario.log(arg0);
+    }
+    // Gherkin of the following, will use the @DataTableType and the
+//    Given the following orders ll exist:
+//            |first name|last name|quantity|price|
+//            |Jane      |Santorini   |133      |2.33|
+//            |Hanna      |Beckett  |12       |35.35|
+    @DataTableType
+    public Order convertToOrder(Map<String, String> entry) {
+        String custId = entry.get("first name") + entry.get("last name");
+        return new Order(-1, Integer.parseInt(entry.get("quantity")), Double.parseDouble(entry.get("price")), custId);
+    }
+    @Given("the following orders exist:")
+    public void couldCreateOrCheckTheyExistInLogic(List<Order> orders) {
+        System.out.println("Following orders exist:" + orders);
     }
 }
