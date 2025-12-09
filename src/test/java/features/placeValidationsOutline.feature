@@ -12,6 +12,25 @@ Scenario Outline: # Verify adding product passing order data
   And "body.price" in response body is "<price>"
 #  sometimes this could be a different scenario, but I think it applies here
   When user calls "GetProductByKey" with "Get" http request with "key" in path
+  Given "The Hitchhiker's Guide to the Galaxy" is my favorite book
+  Given Order with id of "1" exists
+  Given Books are defined by json
+    """
+    [
+      {
+        "title": "The Hitchhiker's Guide to the Galaxy",
+        "author": "Douglas Adams",
+        "isbn": "978-0345391803"
+      },
+      {
+        "title": "Pride and Prejudice",
+        "author": "Jane Austen",
+        "isbn": "978-0141439518"
+      }
+    ]
+    """
+
+
   Given the following orders exist:
     |first name|last name|quantity|price|
     |Jane      |Santorini   |133      |2.33|

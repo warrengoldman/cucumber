@@ -1,11 +1,17 @@
 package stepDefinitions;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rest.cucumber.model.Book;
 import com.rest.cucumber.model.Order;
 import com.rest.cucumber.model.TestOrderFactory;
 
 import io.cucumber.java.Before;
 import io.cucumber.java.BeforeAll;
 import io.cucumber.java.DataTableType;
+import io.cucumber.java.DocStringType;
+import io.cucumber.java.ParameterType;
 import io.cucumber.java.PendingException;
 import io.cucumber.java.Scenario;
 import io.cucumber.java.en.Given;
@@ -18,9 +24,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.json.JSONArray;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
@@ -147,8 +156,47 @@ public class StepDefinition {
         String custId = entry.get("first name") + entry.get("last name");
         return new Order(-1, Integer.parseInt(entry.get("quantity")), Double.parseDouble(entry.get("price")), custId);
     }
+
     @Given("the following orders exist:")
     public void couldCreateOrCheckTheyExistInLogic(List<Order> orders) {
         System.out.println("Following orders exist:" + orders);
+    }
+
+    // the name of the method must match the name of the variable in the Given below
+    @ParameterType(".*")
+    public Book favoriteBookName(String bookName) {
+        // would go find other metadata for bookName and value at this point
+        return new Book(bookName, null, null);
+    }
+
+    @Given("{favoriteBookName} is my favorite book")
+    public void this_is_my_favorite_book(Book myBook) {
+        System.out.println("Book is my favorite book:"  + myBook);
+    }
+
+    @ParameterType(".*")
+    public Order orderId(String orderKey) {
+        return TestOrderFactory.getOrders().getFirst();
+    }
+
+    @Given("Order with id of {orderId} exists")
+    public void order_with_id(Order order) {
+        System.out.println("Order is:"  + order);
+    }
+
+    private static ObjectMapper objectMapper = new ObjectMapper();
+
+    @DocStringType
+    public JsonNode json(String docString) throws JsonProcessingException {
+        return objectMapper.readValue(docString, JsonNode.class);
+    }
+
+    @Given("Books are defined by json")
+    public void books_are_defined_by_json(JsonNode books) {
+        List<Book> bookList = new ArrayList<>();
+        if (books.isArray()) {
+            books.forEach(book -> bookList.add(new ObjectMapper().convertValue(book, Book.class)));
+        }
+        System.out.println("Books are:"  + bookList);
     }
 }
